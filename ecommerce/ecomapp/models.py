@@ -97,3 +97,14 @@ class ProductSubCategory(models.Model):
 
     def __str__(self):
         return self.sub_cat_name
+    
+    def save(self, *args, **kwargs):
+        if not self.sub_cat_slug and self.main_category:
+            base_slug = slugify(self.sub_cat_name)
+            slug = base_slug
+            num = 1
+            while ProductSubCategory.objects.filter(sub_cat_slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{num}"
+                num += 1
+            self.sub_cat_slug = slug
+        super().save(*args, **kwargs)
