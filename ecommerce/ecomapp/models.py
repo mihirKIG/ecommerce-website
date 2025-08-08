@@ -108,3 +108,42 @@ class ProductSubCategory(models.Model):
                 num += 1
             self.sub_cat_slug = slug
         super().save(*args, **kwargs)
+        
+        
+class Product(models.Model):
+    product_name = models.CharField(max_length=100, unique=True)
+    product_slug = models.SlugField(max_length=150, unique=True, blank=True)
+    product_image = models.ImageField(upload_to='ecommerce/product_images/', blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.IntegerField(default=0)
+    main_category = models.ForeignKey(ProductMainCategory, on_delete=models.CASCADE, related_name='products')
+    sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.CASCADE, related_name='products', blank=True, null=True)
+    is_featured = models.BooleanField(default=False)
+    total_views = models.IntegerField(default=0)
+
+    description = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_created_by')
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_updated_by', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=False, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'product'
+        verbose_name_plural = 'Products'
+        ordering = ['-is_active']
+
+    def __str__(self):
+        return self.product_name
+
+    def save(self, *args, **kwargs):
+        if not self.product_slug and self.product_name:
+            base_slug = slugify(self.product_name)
+            slug = base_slug
+            num = 1
+            while Product.objects.filter(product_slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{num}"
+                num += 1
+            self.product_slug = slug
+        super().save(*args, **kwargs)

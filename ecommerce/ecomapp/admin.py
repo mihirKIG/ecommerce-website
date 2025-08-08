@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import MenuList, UserPermission, ProductMainCategory, ProductSubCategory
+from .models import MenuList, UserPermission, ProductMainCategory, ProductSubCategory,Product
 
 @admin.register(MenuList)
 class MenuListAdmin(admin.ModelAdmin):
@@ -24,7 +24,15 @@ class ProductMainCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(ProductSubCategory)
 class ProductSubCategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'sub_cat_name', 'sub_cat_slug', 'sub_cat_image', 'sub_cat_ordering', 'created_by', 'is_active')
+    list_display = ('sub_cat_name', 'main_category','sub_cat_ordering', 'created_by', 'updated_by', 'created_at', 'is_active')
     search_fields = ('sub_cat_name', 'sub_cat_slug')
     list_filter = ('is_active',)
-    ordering = ('id',)
+    ordering = ('sub_cat_ordering',)
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('product_name','main_category', 'sub_category', 'price', 'stock', 'created_by', 'updated_by', 'created_at', 'is_active')
+    search_fields = ('product_name', 'main_category__main_cat_name', 'sub_category__sub_cat_name', 'product_slug')
+    list_filter = ('is_active', 'main_category', 'sub_category')
+    ordering = ('product_name',)

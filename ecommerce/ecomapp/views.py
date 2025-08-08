@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
-from .models import MenuList, ProductMainCategory
+from .models import MenuList, ProductMainCategory,Product
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -161,8 +161,17 @@ def product_main_category_delete(request, pk):
 def product_list(request):
     if not checkUserPermission(request, "can_view", "backend/product-list"):
         return render(request, "403.html")
-    # Logic for product list view
-    return render(request, "product/product_list.html")
+    
+    products = Product.objects.filter(is_active=True).order_by('-id')
+    page_number = request.GET.get('page', 1)
+    products, paginator_list, last_page_number = paginate_data(request, page_number, products)  
+    
+    context = {
+        'paginator_list':paginator_list,
+        'last_page_number':last_page_number,
+        'products':products,
+    }
+    return render(request, "product/product_list.html", context)
 
 
 
